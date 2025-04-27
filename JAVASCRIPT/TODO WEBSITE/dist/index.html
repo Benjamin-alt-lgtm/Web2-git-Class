@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My To-Do List</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Boxicons CDN for icons -->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+</head>
+<body class="bg-red-400 min-h-screen flex items-center justify-center p-4">
+    <div class="bg-gray-200 w-full max-w-4xl p-6 sm:p-10 rounded-lg shadow-md">
+        <!-- Hero text -->
+        <h1 class="text-center text-3xl sm:text-5xl font-bold py-5 text-gray-800">TO DO</h1>
+
+        <!-- Search Section -->
+        <div>
+            <span class="block text-center font-bold text-gray-700 mb-2">SEARCH</span>
+            <div class="flex flex-col sm:flex-row items-center gap-2 justify-center mb-6">
+                <input 
+                    class="w-full sm:w-[500px] px-4 py-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-400" 
+                    type="text" 
+                    id="search-input" 
+                    placeholder="Enter your search here..."
+                >
+                <button 
+                    class="w-full sm:w-auto px-5 py-3 rounded-md bg-black text-white hover:bg-red-400"
+                >
+                    Search
+                </button>
+            </div>
+        </div>
+
+        <!-- Add Todo Section -->
+        <div class="py-5">
+            <span class="block text-center font-bold text-gray-700 mb-2">ADD NEW TASK</span>
+            <div class="flex flex-col sm:flex-row items-center gap-2 justify-center">
+                <input 
+                    class="w-full sm:w-[500px] px-4 py-3 rounded-md border focus:outline-none focus:ring-2 focus:ring-red-400" 
+                    type="text" 
+                    id="todo-input" 
+                    placeholder="Add new todo..."
+                >
+                <button 
+                    id="add-btn" 
+                    class="w-full sm:w-auto px-5 py-3 rounded-md bg-black text-white hover:bg-red-400"
+                >
+                    Submit
+                </button>
+            </div>
+        </div>
+
+        <!-- Task List -->
+        <ul id="todo-list" class="space-y-2 mt-6"></ul>
+
+        <!-- Filter Options -->
+        <div class="flex flex-col sm:flex-row gap-4 sm:gap-14 mt-6 justify-center text-gray-700 font-medium">
+            <p>All-Do List <i class='bx bx-chevron-down'></i></p>
+            <p>Done to-do <i class='bx bx-chevron-down'></i></p>
+            <p>Unfinish to-do <i class='bx bx-chevron-down'></i></p>
+        </div>
+    </div>
+
+    <script>
+        // Grab our toy box tools
+        const todoInput = document.getElementById('todo-input');
+        const addBtn = document.getElementById('add-btn');
+        const todoList = document.getElementById('todo-list');
+
+        // Function to format date and time (like a toy box clock)
+        function formatDateTime(date) {
+            return date.toLocaleString('en-US', {
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+
+        // Function to add a new toy (task)
+        function addTask() {
+            const taskName = todoInput.value.trim(); // Get the task name
+            if (taskName === '') {
+                alert('Oops! Tell me what task you want to add!');
+                return;
+            }
+
+            // Get current date/time for when task is added
+            const addedDate = new Date();
+            const addedTimeString = formatDateTime(addedDate);
+
+            // Make a new task slot
+            const taskSlot = document.createElement('li');
+            taskSlot.className = 'flex flex-col sm:flex-row items-start sm:items-center justify-between p-3 bg-white rounded-md shadow-sm';
+
+            // Add a checkbox to mark the task as done
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.className = 'mr-2';
+            checkbox.addEventListener('change', () => {
+                taskSlot.classList.toggle('line-through');
+                taskSlot.classList.toggle('text-gray-500');
+                const doneTimeSpan = taskSlot.querySelector('.done-time');
+                if (checkbox.checked) {
+                    const doneDate = new Date();
+                    doneTimeSpan.textContent = `Done: ${formatDateTime(doneDate)}`;
+                } else {
+                    doneTimeSpan.textContent = '';
+                }
+            });
+
+            // Create a div for task name and times
+            const taskInfo = document.createElement('div');
+            taskInfo.className = 'flex-1';
+
+            // Add the task name
+            const taskNameSpan = document.createElement('span');
+            taskNameSpan.textContent = taskName;
+            taskNameSpan.className = 'block';
+
+            // Add the added time
+            const addedTimeSpan = document.createElement('span');
+            addedTimeSpan.textContent = `Added: ${addedTimeString}`;
+            addedTimeSpan.className = 'block text-sm text-gray-600';
+
+            // Add a span for done time (empty until checked)
+            const doneTimeSpan = document.createElement('span');
+            doneTimeSpan.className = 'done-time block text-sm text-gray-600';
+
+            // Add a delete button
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
+            deleteBtn.className = 'bg-red-500 text-white px-3 py-1 rounded-md hover:bg-red-600 mt-2 sm:mt-0';
+            deleteBtn.addEventListener('click', () => {
+                todoList.removeChild(taskSlot);
+            });
+
+            // Put task name and times in taskInfo
+            taskInfo.appendChild(taskNameSpan);
+            taskInfo.appendChild(addedTimeSpan);
+            taskInfo.appendChild(doneTimeSpan);
+
+            // Put everything in the task slot
+            taskSlot.appendChild(checkbox);
+            taskSlot.appendChild(taskInfo);
+            taskSlot.appendChild(deleteBtn);
+            todoList.appendChild(taskSlot);
+
+            todoInput.value = ''; // Clear the input
+        }
+
+        // Make the Submit button and Enter key work
+        addBtn.addEventListener('click', addTask);
+        todoInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') addTask();
+        });
+    </script>
+</body>
+</html>
